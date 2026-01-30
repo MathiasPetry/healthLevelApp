@@ -1,4 +1,4 @@
-# HealthLevelApp
+# HealthLevelApp 🛠️🔋
 
 Aplicativo Android que calcula o **HealthLevel** do carro a partir de respostas objetivas sobre o estado do veículo e informações de revisão.
 
@@ -22,41 +22,6 @@ Aplicativo Android que calcula o **HealthLevel** do carro a partir de respostas 
   - ViewModel concentra o estado e regras de tela.
 - **Factory** (`FabricaCarro`)
   - Instancia o tipo correto de `Carro`.
-
-## Estrutura do projeto
-
-```
-app/src/main/java/com/example/carhealth/
-├── apresentacao/
-│   ├── HealthLevelApp.kt
-│   ├── HealthLevelViewModel.kt
-│   ├── InitialFormState.kt
-│   ├── MaintenanceState.kt
-│   ├── Rotas.kt
-│   ├── tema/
-│   │   └── TemaHealthLevel.kt
-│   └── telas/
-│       ├── TelaInicial.kt
-│       ├── TelaPerguntas.kt
-│       └── TelaResultado.kt
-├── dominio/
-│   ├── Carro.kt
-│   ├── CarroCombustao.kt
-│   ├── CarroEletrico.kt
-│   ├── CarroHibrido.kt
-│   ├── CalculadoraHealthLevel.kt
-│   ├── CalculadoraRevisao.kt
-│   ├── DadosRevisao.kt
-│   ├── DiagnosticoHealthLevel.kt
-│   ├── FabricaCarro.kt
-│   ├── OpcaoResposta.kt
-│   ├── PerguntaAvaliacao.kt
-│   ├── PerguntasCarro.kt
-│   ├── PreferenciaRevisao.kt
-│   ├── ResumoRevisao.kt
-│   └── ResultadoHealthLevel.kt
-└── AtividadePrincipal.kt
-```
 
 ## Como executar
 

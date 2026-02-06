@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carhealth.apresentacao.InitialFormState
-import com.example.carhealth.domain.CarType
+import com.example.carhealth.dominio.TipoCarro
 
 private val Preto = Color(0xFF000000)
 private val CinzaEscuro = Color(0xFF1F2933)
@@ -39,7 +39,7 @@ fun InitialScreen(
     formState: InitialFormState,
     onUpdateModel: (String) -> Unit,
     onUpdateYear: (String) -> Unit,
-    onSelectType: (CarType) -> Unit,
+    onSelectType: (TipoCarro) -> Unit,
     onContinue: () -> Unit
 ) {
     Column(
@@ -77,7 +77,7 @@ fun InitialScreen(
             )
 
             OutlinedTextField(
-                value = formState.model,
+                value = formState.modelo,
                 onValueChange = onUpdateModel,
                 label = { Text("Modelo do carro") },
                 singleLine = true,
@@ -94,7 +94,7 @@ fun InitialScreen(
             )
 
             OutlinedTextField(
-                value = formState.manufactureYear,
+                value = formState.anoFabricacao,
                 onValueChange = onUpdateYear,
                 label = { Text("Ano de fabricação") },
                 singleLine = true,
@@ -120,10 +120,10 @@ fun InitialScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    CarType.values().forEach { type ->
+                    TipoCarro.values().forEach { type ->
                         CarTypeCard(
                             type = type,
-                            selected = formState.selectedType == type,
+                            selected = formState.tipoSelecionado == type,
                             onSelect = { onSelectType(type) },
                             modifier = Modifier.weight(1f)
                         )
@@ -131,9 +131,9 @@ fun InitialScreen(
                 }
             }
 
-            if (formState.error != null) {
+            if (formState.erro != null) {
                 Text(
-                    text = formState.error,
+                    text = formState.erro,
                     color = Vermelho,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -162,7 +162,7 @@ fun InitialScreen(
 
 @Composable
 private fun CarTypeCard(
-    type: CarType,
+    type: TipoCarro,
     selected: Boolean,
     onSelect: () -> Unit,
     modifier: Modifier = Modifier
@@ -181,7 +181,7 @@ private fun CarTypeCard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = type.label,
+            text = type.rotulo,
             color = textColor,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold

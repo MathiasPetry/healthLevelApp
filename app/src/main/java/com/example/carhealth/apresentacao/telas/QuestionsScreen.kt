@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.carhealth.apresentacao.EstadoRevisao
+import com.example.carhealth.apresentacao.MaintenanceState
 import com.example.carhealth.dominio.Carro
 import com.example.carhealth.dominio.PerguntaAvaliacao
 import com.example.carhealth.dominio.PreferenciaRevisao
@@ -41,18 +41,18 @@ private val Verde = Color(0xFF10B981)
 private val Vermelho = Color(0xFFDC2626)
 
 @Composable
-fun TelaPerguntas(
-    carro: Carro?,
-    perguntas: List<PerguntaAvaliacao>,
-    estadoRevisao: EstadoRevisao,
-    obterRespostaSelecionada: (String) -> Int?,
-    registrarResposta: (String, Int) -> Unit,
-    todasRespondidas: () -> Boolean,
-    aoAtualizarQuilometragem: (String) -> Unit,
-    aoAtualizarMesesRevisao: (String) -> Unit,
-    aoSelecionarPreferencia: (PreferenciaRevisao) -> Unit,
-    aoVoltar: () -> Unit,
-    aoVerResultado: () -> Unit
+fun QuestionsScreen(
+    car: Carro?,
+    questions: List<PerguntaAvaliacao>,
+    maintenanceState: MaintenanceState,
+    getSelectedAnswer: (String) -> Int?,
+    recordAnswer: (String, Int) -> Unit,
+    allAnswered: () -> Boolean,
+    onUpdateMileage: (String) -> Unit,
+    onUpdateMonthsSinceService: (String) -> Unit,
+    onSelectPreference: (PreferenciaRevisao) -> Unit,
+    onBack: () -> Unit,
+    onSeeResult: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -67,23 +67,23 @@ fun TelaPerguntas(
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                CabecalhoPerguntas(carro = carro)
+                CabecalhoPerguntas(carro = car)
             }
 
             item {
                 SecaoRevisao(
-                    estadoRevisao = estadoRevisao,
-                    aoAtualizarQuilometragem = aoAtualizarQuilometragem,
-                    aoAtualizarMesesRevisao = aoAtualizarMesesRevisao,
-                    aoSelecionarPreferencia = aoSelecionarPreferencia
+                    maintenanceState = maintenanceState,
+                    onUpdateMileage = onUpdateMileage,
+                    onUpdateMonthsSinceService = onUpdateMonthsSinceService,
+                    onSelectPreference = onSelectPreference
                 )
             }
 
-            items(perguntas, key = { it.id }) { pergunta ->
+            items(questions, key = { it.id }) { question ->
                 PerguntaMinimalista(
-                    pergunta = pergunta,
-                    indiceSelecionado = obterRespostaSelecionada(pergunta.id),
-                    aoSelecionarOpcao = { indice -> registrarResposta(pergunta.id, indice) }
+                    pergunta = question,
+                    indiceSelecionado = getSelectedAnswer(question.id),
+                    aoSelecionarOpcao = { indice -> recordAnswer(question.id, indice) }
                 )
             }
 
@@ -91,9 +91,9 @@ fun TelaPerguntas(
         }
 
         RodapePerguntas(
-            habilitarResultado = todasRespondidas(),
-            aoVoltar = aoVoltar,
-            aoVerResultado = aoVerResultado
+            habilitarResultado = allAnswered(),
+            aoVoltar = onBack,
+            aoVerResultado = onSeeResult
         )
     }
 }
@@ -121,10 +121,10 @@ private fun CabecalhoPerguntas(carro: Carro?) {
 
 @Composable
 private fun SecaoRevisao(
-    estadoRevisao: EstadoRevisao,
-    aoAtualizarQuilometragem: (String) -> Unit,
-    aoAtualizarMesesRevisao: (String) -> Unit,
-    aoSelecionarPreferencia: (PreferenciaRevisao) -> Unit
+    maintenanceState: MaintenanceState,
+    onUpdateMileage: (String) -> Unit,
+    onUpdateMonthsSinceService: (String) -> Unit,
+    onSelectPreference: (PreferenciaRevisao) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -141,8 +141,8 @@ private fun SecaoRevisao(
         )
 
         OutlinedTextField(
-            value = estadoRevisao.quilometragemTotal,
-            onValueChange = aoAtualizarQuilometragem,
+            value = maintenanceState.quilometragemTotal,
+            onValueChange = onUpdateMileage,
             label = { Text("Quilometragem total") },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
@@ -158,8 +158,8 @@ private fun SecaoRevisao(
         )
 
         OutlinedTextField(
-            value = estadoRevisao.mesesDesdeUltimaRevisao,
-            onValueChange = aoAtualizarMesesRevisao,
+            value = maintenanceState.mesesDesdeUltimaRevisao,
+            onValueChange = onUpdateMonthsSinceService,
             label = { Text("Meses desde a última revisão") },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
@@ -183,22 +183,22 @@ private fun SecaoRevisao(
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 PreferenciaCard(
                     preferencia = PreferenciaRevisao.POR_KM,
-                    selecionada = estadoRevisao.preferencia == PreferenciaRevisao.POR_KM,
-                    aoSelecionar = { aoSelecionarPreferencia(PreferenciaRevisao.POR_KM) },
+                    selecionada = maintenanceState.preferencia == PreferenciaRevisao.POR_KM,
+                    aoSelecionar = { onSelectPreference(PreferenciaRevisao.POR_KM) },
                     modifier = Modifier.weight(1f)
                 )
                 PreferenciaCard(
                     preferencia = PreferenciaRevisao.POR_TEMPO,
-                    selecionada = estadoRevisao.preferencia == PreferenciaRevisao.POR_TEMPO,
-                    aoSelecionar = { aoSelecionarPreferencia(PreferenciaRevisao.POR_TEMPO) },
+                    selecionada = maintenanceState.preferencia == PreferenciaRevisao.POR_TEMPO,
+                    aoSelecionar = { onSelectPreference(PreferenciaRevisao.POR_TEMPO) },
                     modifier = Modifier.weight(1f)
                 )
             }
         }
 
-        if (estadoRevisao.erro != null) {
+        if (maintenanceState.erro != null) {
             Text(
-                text = estadoRevisao.erro,
+                text = maintenanceState.erro,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Vermelho
             )

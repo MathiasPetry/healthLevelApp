@@ -5,16 +5,16 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.carhealth.domain.AssessmentQuestion
-import com.example.carhealth.domain.Car
-import com.example.carhealth.domain.CarFactory
-import com.example.carhealth.domain.CarType
-import com.example.carhealth.domain.HealthLevelCalculator
-import com.example.carhealth.domain.HealthLevelDiagnostic
-import com.example.carhealth.domain.MaintenanceCalculator
-import com.example.carhealth.domain.MaintenanceData
-import com.example.carhealth.domain.MaintenancePreference
-import com.example.carhealth.domain.MaintenanceSummary
+import com.example.carhealth.dominio.CalculadoraHealthLevel
+import com.example.carhealth.dominio.CalculadoraRevisao
+import com.example.carhealth.dominio.Carro
+import com.example.carhealth.dominio.DadosRevisao
+import com.example.carhealth.dominio.DiagnosticoHealthLevel
+import com.example.carhealth.dominio.FabricaCarro
+import com.example.carhealth.dominio.PerguntaAvaliacao
+import com.example.carhealth.dominio.PreferenciaRevisao
+import com.example.carhealth.dominio.ResumoRevisao
+import com.example.carhealth.dominio.TipoCarro
 import java.util.Calendar
 
 class HealthLevelViewModel : ViewModel() {
@@ -24,102 +24,103 @@ class HealthLevelViewModel : ViewModel() {
     var maintenanceState: MaintenanceState by mutableStateOf(MaintenanceState())
         private set
 
-    var currentCar: Car? by mutableStateOf(null)
+    var currentCar: Carro? by mutableStateOf(null)
         private set
 
-    var questions: List<AssessmentQuestion> by mutableStateOf(emptyList())
+    var questions: List<PerguntaAvaliacao> by mutableStateOf(emptyList())
         private set
 
-    private val selectedAnswers = mutableStateMapOf<String, Int>()
+    private val respostasSelecionadas = mutableStateMapOf<String, Int>()
 
-    var healthLevelDiagnostic: HealthLevelDiagnostic? by mutableStateOf(null)
+    var healthLevelDiagnostic: DiagnosticoHealthLevel? by mutableStateOf(null)
         private set
 
     fun updateModel(newModel: String) {
-        formState = formState.copy(model = newModel, error = null)
+        formState = formState.copy(modelo = newModel, erro = null)
     }
 
     fun updateManufactureYear(newYear: String) {
-        formState = formState.copy(manufactureYear = newYear, error = null)
+        formState = formState.copy(anoFabricacao = newYear, erro = null)
     }
 
-    fun selectCarType(type: CarType) {
-        formState = formState.copy(selectedType = type, error = null)
+    fun selectCarType(type: TipoCarro) {
+        formState = formState.copy(tipoSelecionado = type, erro = null)
     }
 
     fun updateTotalMileage(newMileage: String) {
-        maintenanceState = maintenanceState.copy(totalMileage = newMileage, error = null)
+        maintenanceState = maintenanceState.copy(quilometragemTotal = newMileage, erro = null)
     }
 
     fun updateMonthsSinceLastService(newMonths: String) {
-        maintenanceState = maintenanceState.copy(monthsSinceLastService = newMonths, error = null)
+        maintenanceState = maintenanceState.copy(mesesDesdeUltimaRevisao = newMonths, erro = null)
     }
 
-    fun selectMaintenancePreference(preference: MaintenancePreference) {
-        maintenanceState = maintenanceState.copy(preference = preference, error = null)
+    fun selectMaintenancePreference(preference: PreferenciaRevisao) {
+        maintenanceState = maintenanceState.copy(preferencia = preference, erro = null)
     }
 
     fun startAssessment(): Boolean {
-        val model = formState.model.trim()
-        if (model.isBlank()) {
-            formState = formState.copy(error = "Informe o modelo do carro.")
+        val modelo = formState.modelo.trim()
+        if (modelo.isBlank()) {
+            formState = formState.copy(erro = "Informe o modelo do carro.")
             return false
         }
 
-        val year = validateYear(formState.manufactureYear)
-        if (year == null) {
-            formState = formState.copy(error = "Informe um ano de fabricação válido.")
+        val anoFabricacao = validateYear(formState.anoFabricacao)
+        if (anoFabricacao == null) {
+            formState = formState.copy(erro = "Informe um ano de fabricacao valido.")
             return false
         }
 
-        val type = formState.selectedType
-        if (type == null) {
-            formState = formState.copy(error = "Selecione o tipo de carro.")
+        val tipoSelecionado = formState.tipoSelecionado
+        if (tipoSelecionado == null) {
+            formState = formState.copy(erro = "Selecione o tipo de carro.")
             return false
         }
 
-        currentCar = CarFactory.createCar(type, model, year)
-        questions = currentCar?.listObjectiveQuestions().orEmpty()
-        selectedAnswers.clear()
+        currentCar = FabricaCarro.criarCarro(tipoSelecionado, modelo, anoFabricacao)
+        questions = currentCar?.listarPerguntasObjetivas().orEmpty()
+        respostasSelecionadas.clear()
         healthLevelDiagnostic = null
         maintenanceState = MaintenanceState()
-        formState = formState.copy(error = null)
+        formState = formState.copy(erro = null)
         return true
     }
 
     fun recordAnswer(questionId: String, optionIndex: Int) {
-        selectedAnswers[questionId] = optionIndex
+        respostasSelecionadas[questionId] = optionIndex
     }
 
     fun getSelectedAnswer(questionId: String): Int? {
-        return selectedAnswers[questionId]
+        return respostasSelecionadas[questionId]
     }
 
     fun allAnswered(): Boolean {
-        return questions.isNotEmpty() && selectedAnswers.size == questions.size
+        return questions.isNotEmpty() && respostasSelecionadas.size == questions.size
     }
 
-    fun calculateResult(): HealthLevelDiagnostic? {
+    fun calculateResult(): DiagnosticoHealthLevel? {
         if (!allAnswered()) {
             return null
         }
-        val maintenanceData = validateMaintenance() ?: return null
-        val car = currentCar ?: return null
-        val maintenanceSummary = MaintenanceCalculator().calculate(maintenanceData, car.manufactureYear)
-        val baseResult = HealthLevelCalculator().calculate(
-            questions = questions,
-            selectedAnswers = selectedAnswers.toMap(),
-            extraPoints = maintenanceSummary.serviceScore,
-            extraMaxPoints = 10
+
+        val dadosRevisao = validateMaintenance() ?: return null
+        val carroAtual = currentCar ?: return null
+        val resumoRevisao = CalculadoraRevisao().calcular(dadosRevisao, carroAtual.anoFabricacao)
+        val resultadoBase = CalculadoraHealthLevel().calcular(
+            perguntas = questions,
+            respostasSelecionadas = respostasSelecionadas.toMap(),
+            pontosExtras = resumoRevisao.pontuacaoRevisao,
+            pontosMaximosExtras = 10
         )
-        val suggestions = generateSuggestions(car, maintenanceSummary)
-        val diagnostic = HealthLevelDiagnostic(
-            result = baseResult,
-            suggestions = suggestions,
-            maintenanceSummary = maintenanceSummary
+        val sugestoes = generateSuggestions(carroAtual, resumoRevisao)
+        val diagnostico = DiagnosticoHealthLevel(
+            resultado = resultadoBase,
+            sugestoes = sugestoes,
+            resumoRevisao = resumoRevisao
         )
-        healthLevelDiagnostic = diagnostic
-        return diagnostic
+        healthLevelDiagnostic = diagnostico
+        return diagnostico
     }
 
     fun reset() {
@@ -127,7 +128,7 @@ class HealthLevelViewModel : ViewModel() {
         maintenanceState = MaintenanceState()
         currentCar = null
         questions = emptyList()
-        selectedAnswers.clear()
+        respostasSelecionadas.clear()
         healthLevelDiagnostic = null
     }
 
@@ -137,68 +138,68 @@ class HealthLevelViewModel : ViewModel() {
         return if (year in 1886..currentYear) year else null
     }
 
-    private fun validateMaintenance(): MaintenanceData? {
-        val mileage = maintenanceState.totalMileage.trim().toIntOrNull()
-        if (mileage == null || mileage < 0) {
-            maintenanceState = maintenanceState.copy(error = "Informe a quilometragem total do carro.")
+    private fun validateMaintenance(): DadosRevisao? {
+        val quilometragemTotal = maintenanceState.quilometragemTotal.trim().toIntOrNull()
+        if (quilometragemTotal == null || quilometragemTotal < 0) {
+            maintenanceState = maintenanceState.copy(erro = "Informe a quilometragem total do carro.")
             return null
         }
 
-        val months = maintenanceState.monthsSinceLastService.trim().toIntOrNull()
-        if (months == null || months < 0) {
-            maintenanceState = maintenanceState.copy(error = "Informe quantos meses fazem desde a última revisão.")
+        val mesesDesdeUltimaRevisao = maintenanceState.mesesDesdeUltimaRevisao.trim().toIntOrNull()
+        if (mesesDesdeUltimaRevisao == null || mesesDesdeUltimaRevisao < 0) {
+            maintenanceState = maintenanceState.copy(erro = "Informe quantos meses fazem desde a ultima revisao.")
             return null
         }
 
-        val preference = maintenanceState.preference
-        if (preference == null) {
-            maintenanceState = maintenanceState.copy(error = "Escolha como prefere o lembrete da revisão.")
+        val preferenciaRevisao = maintenanceState.preferencia
+        if (preferenciaRevisao == null) {
+            maintenanceState = maintenanceState.copy(erro = "Escolha como prefere o lembrete da revisao.")
             return null
         }
 
-        return MaintenanceData(
-            totalMileage = mileage,
-            monthsSinceLastService = months,
-            preference = preference
+        return DadosRevisao(
+            quilometragemTotal = quilometragemTotal,
+            mesesDesdeUltimaRevisao = mesesDesdeUltimaRevisao,
+            preferencia = preferenciaRevisao
         )
     }
 
-    private fun generateSuggestions(car: Car, maintenanceSummary: MaintenanceSummary): List<String> {
-        val suggestions = mutableListOf<String>()
-        val suggestionById = mapOf(
-            "freios" to "Agende uma inspeção dos freios e verifique pastilhas e discos.",
-            "pneus" to "Revise a calibragem e faça o rodízio dos pneus.",
-            "suspensao" to "Avalie a suspensão para eliminar ruídos e melhorar o conforto.",
-            "direcao" to "Cheque alinhamento e balanceamento para uma direção precisa.",
-            "motor" to "Faça diagnóstico do motor para evitar falhas e perda de desempenho.",
+    private fun generateSuggestions(car: Carro, maintenanceSummary: ResumoRevisao): List<String> {
+        val sugestoes = mutableListOf<String>()
+        val sugestaoPorId = mapOf(
+            "freios" to "Agende uma inspecao dos freios e verifique pastilhas e discos.",
+            "pneus" to "Revise a calibragem e faca o rodizio dos pneus.",
+            "suspensao" to "Avalie a suspensao para eliminar ruidos e melhorar o conforto.",
+            "direcao" to "Cheque alinhamento e balanceamento para uma direcao precisa.",
+            "motor" to "Faca diagnostico do motor para evitar falhas e perda de desempenho.",
             "fluidos" to "Complete ou troque fluidos para evitar desgaste prematuro.",
-            "bateria" to "Monitore a saúde da bateria e programe manutenção preventiva."
+            "bateria" to "Monitore a saude da bateria e programe manutencao preventiva."
         )
 
         questions.forEach { question ->
-            val index = selectedAnswers[question.id] ?: return@forEach
-            val points = question.options.getOrNull(index)?.points ?: 0
-            if (points <= 6) {
-                suggestionById[question.id]?.let { suggestions.add(it) }
+            val indiceResposta = respostasSelecionadas[question.id] ?: return@forEach
+            val pontosOpcao = question.opcoes.getOrNull(indiceResposta)?.pontos ?: 0
+            if (pontosOpcao <= 6) {
+                sugestaoPorId[question.id]?.let { sugestoes.add(it) }
             }
         }
 
-        if (maintenanceSummary.isOverdue) {
-            suggestions.add("Agende uma revisão completa o quanto antes para evitar riscos.")
-        } else if (maintenanceSummary.daysToNextService in 0..30) {
-            suggestions.add("Sua próxima revisão está próxima. Agende com antecedência.")
+        if (maintenanceSummary.revisaoAtrasada) {
+            sugestoes.add("Agende uma revisao completa o quanto antes para evitar riscos.")
+        } else if (maintenanceSummary.diasParaProximaRevisao in 0..30) {
+            sugestoes.add("Sua proxima revisao esta proxima. Agende com antecedencia.")
         }
 
-        when (car.type) {
-            CarType.ELECTRIC -> suggestions.add("Evite descargas profundas e priorize recargas entre 20% e 80%.")
-            CarType.HYBRID -> suggestions.add("Alterne o uso dos modos para otimizar consumo e preservar a bateria.")
-            CarType.COMBUSTION -> suggestions.add("Prefira abastecer em postos confiáveis e mantenha o motor aquecido.")
+        when (car.tipo) {
+            TipoCarro.ELETRICO -> sugestoes.add("Evite descargas profundas e priorize recargas entre 20% e 80%.")
+            TipoCarro.HIBRIDO -> sugestoes.add("Alterne o uso dos modos para otimizar consumo e preservar a bateria.")
+            TipoCarro.COMBUSTAO -> sugestoes.add("Prefira abastecer em postos confiaveis e mantenha o motor aquecido.")
         }
 
-        if (suggestions.isEmpty()) {
-            suggestions.add("Seu carro está equilibrado. Mantenha a manutenção preventiva em dia.")
+        if (sugestoes.isEmpty()) {
+            sugestoes.add("Seu carro esta equilibrado. Mantenha a manutencao preventiva em dia.")
         }
 
-        return suggestions.distinct()
+        return sugestoes.distinct()
     }
 }

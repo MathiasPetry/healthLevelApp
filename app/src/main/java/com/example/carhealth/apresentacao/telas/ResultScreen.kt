@@ -30,13 +30,13 @@ private val Branco = Color(0xFFF9FAFB)
 private val Verde = Color(0xFF10B981)
 
 @Composable
-fun TelaResultado(
-    carro: Carro?,
-    diagnostico: DiagnosticoHealthLevel?,
-    aoReiniciar: () -> Unit
+fun ResultScreen(
+    car: Carro?,
+    diagnostic: DiagnosticoHealthLevel?,
+    onRestart: () -> Unit
 ) {
-    val resultado = diagnostico?.resultado
-    val resumoRevisao = diagnostico?.resumoRevisao
+    val resultado = diagnostic?.resultado
+    val resumoRevisao = diagnostic?.resumoRevisao
     val diasParaRevisao = resumoRevisao?.diasParaProximaRevisao
     val mensagemRevisao = when {
         diasParaRevisao == null -> "Dados insuficientes para calcular a próxima revisão."
@@ -96,9 +96,9 @@ fun TelaResultado(
                 color = Branco.copy(alpha = 0.75f)
             )
 
-            if (carro != null) {
+            if (car != null) {
                 Text(
-                    text = "${carro.modelo} • ${carro.anoFabricacao} • ${carro.tipo.rotulo}",
+                    text = "${car.modelo} • ${car.anoFabricacao} • ${car.tipo.rotulo}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Branco.copy(alpha = 0.6f)
                 )
@@ -118,7 +118,7 @@ fun TelaResultado(
                 style = MaterialTheme.typography.titleMedium,
                 color = Branco
             )
-            val sugestoes = diagnostico?.sugestoes.orEmpty()
+            val sugestoes = diagnostic?.sugestoes.orEmpty()
             sugestoes.forEach { sugestao ->
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -137,7 +137,7 @@ fun TelaResultado(
         }
 
         Button(
-            onClick = aoReiniciar,
+            onClick = onRestart,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Verde,
                 contentColor = Preto

@@ -1,10 +1,10 @@
 package com.example.carhealth.apresentacao
 
-import com.example.carhealth.domain.CarType
+import com.example.carhealth.dominio.TipoCarro
 
 data class InitialFormState(
-    val model: String = "",
-    val manufactureYear: String = "",
-    val selectedType: CarType? = null,
-    val error: String? = null
+    val modelo: String = "",
+    val anoFabricacao: String = "",
+    val tipoSelecionado: TipoCarro? = null,
+    val erro: String? = null
 )

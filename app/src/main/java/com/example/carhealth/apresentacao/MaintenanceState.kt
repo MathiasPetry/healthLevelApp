@@ -1,10 +1,10 @@
 package com.example.carhealth.apresentacao
 
-import com.example.carhealth.domain.MaintenancePreference
+import com.example.carhealth.dominio.PreferenciaRevisao
 
 data class MaintenanceState(
-    val totalMileage: String = "",
-    val monthsSinceLastService: String = "",
-    val preference: MaintenancePreference? = null,
-    val error: String? = null
+    val quilometragemTotal: String = "",
+    val mesesDesdeUltimaRevisao: String = "",
+    val preferencia: PreferenciaRevisao? = null,
+    val erro: String? = null
 )

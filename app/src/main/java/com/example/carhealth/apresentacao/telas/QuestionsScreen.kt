@@ -1,5 +1,6 @@
 package com.example.carhealth.apresentacao.telas
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,26 +20,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.carhealth.apresentacao.MaintenanceState
+import com.example.carhealth.apresentacao.tema.PremiumBackground
+import com.example.carhealth.apresentacao.tema.PremiumPanel
+import com.example.carhealth.apresentacao.tema.premiumFieldColors
 import com.example.carhealth.dominio.Carro
 import com.example.carhealth.dominio.PerguntaAvaliacao
 import com.example.carhealth.dominio.PreferenciaRevisao
-
-private val Preto = Color(0xFF000000)
-private val CinzaEscuro = Color(0xFF1F2933)
-private val Branco = Color(0xFFF9FAFB)
-private val Verde = Color(0xFF10B981)
-private val Vermelho = Color(0xFFDC2626)
 
 @Composable
 fun QuestionsScreen(
@@ -54,57 +50,57 @@ fun QuestionsScreen(
     onBack: () -> Unit,
     onSeeResult: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Preto)
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                CabecalhoPerguntas(carro = car)
+    PremiumBackground {
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(22.dp)
+            ) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CabecalhoPerguntas(carro = car)
+                }
+
+                item {
+                    SecaoRevisao(
+                        maintenanceState = maintenanceState,
+                        onUpdateMileage = onUpdateMileage,
+                        onUpdateMonthsSinceService = onUpdateMonthsSinceService,
+                        onSelectPreference = onSelectPreference
+                    )
+                }
+
+                items(questions, key = { it.id }) { question ->
+                    PerguntaMinimalista(
+                        pergunta = question,
+                        indiceSelecionado = getSelectedAnswer(question.id),
+                        aoSelecionarOpcao = { indice -> recordAnswer(question.id, indice) }
+                    )
+                }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
 
-            item {
-                SecaoRevisao(
-                    maintenanceState = maintenanceState,
-                    onUpdateMileage = onUpdateMileage,
-                    onUpdateMonthsSinceService = onUpdateMonthsSinceService,
-                    onSelectPreference = onSelectPreference
-                )
-            }
-
-            items(questions, key = { it.id }) { question ->
-                PerguntaMinimalista(
-                    pergunta = question,
-                    indiceSelecionado = getSelectedAnswer(question.id),
-                    aoSelecionarOpcao = { indice -> recordAnswer(question.id, indice) }
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            RodapePerguntas(
+                habilitarResultado = allAnswered(),
+                aoVoltar = onBack,
+                aoVerResultado = onSeeResult
+            )
         }
-
-        RodapePerguntas(
-            habilitarResultado = allAnswered(),
-            aoVoltar = onBack,
-            aoVerResultado = onSeeResult
-        )
     }
 }
 
 @Composable
 private fun CabecalhoPerguntas(carro: Carro?) {
+    val colors = MaterialTheme.colorScheme
+
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = "Checklist inteligente",
             style = MaterialTheme.typography.titleLarge,
-            color = Branco
+            color = colors.onBackground
         )
         val descricao = if (carro != null) {
             "${carro.modelo} • ${carro.anoFabricacao} • ${carro.tipo.rotulo}"
@@ -114,7 +110,7 @@ private fun CabecalhoPerguntas(carro: Carro?) {
         Text(
             text = descricao,
             style = MaterialTheme.typography.bodyMedium,
-            color = Branco.copy(alpha = 0.7f)
+            color = colors.onSurfaceVariant
         )
     }
 }
@@ -126,82 +122,65 @@ private fun SecaoRevisao(
     onUpdateMonthsSinceService: (String) -> Unit,
     onSelectPreference: (PreferenciaRevisao) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, CinzaEscuro, RoundedCornerShape(20.dp))
-            .background(CinzaEscuro, RoundedCornerShape(20.dp))
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = "Revisão do carro",
-            style = MaterialTheme.typography.titleMedium,
-            color = Branco
-        )
+    val colors = MaterialTheme.colorScheme
 
-        OutlinedTextField(
-            value = maintenanceState.quilometragemTotal,
-            onValueChange = onUpdateMileage,
-            label = { Text("Quilometragem total") },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Verde,
-                unfocusedBorderColor = Branco.copy(alpha = 0.15f),
-                focusedLabelColor = Verde,
-                unfocusedLabelColor = Branco.copy(alpha = 0.5f),
-                cursorColor = Verde,
-                focusedTextColor = Branco,
-                unfocusedTextColor = Branco
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = maintenanceState.mesesDesdeUltimaRevisao,
-            onValueChange = onUpdateMonthsSinceService,
-            label = { Text("Meses desde a última revisão") },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Verde,
-                unfocusedBorderColor = Branco.copy(alpha = 0.15f),
-                focusedLabelColor = Verde,
-                unfocusedLabelColor = Branco.copy(alpha = 0.5f),
-                cursorColor = Verde,
-                focusedTextColor = Branco,
-                unfocusedTextColor = Branco
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    PremiumPanel(modifier = Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(
-                text = "Preferência de lembrete",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Branco.copy(alpha = 0.85f)
+                text = "Revisão do carro",
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.onSurface
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                PreferenciaCard(
-                    preferencia = PreferenciaRevisao.POR_KM,
-                    selecionada = maintenanceState.preferencia == PreferenciaRevisao.POR_KM,
-                    aoSelecionar = { onSelectPreference(PreferenciaRevisao.POR_KM) },
-                    modifier = Modifier.weight(1f)
+
+            OutlinedTextField(
+                value = maintenanceState.quilometragemTotal,
+                onValueChange = onUpdateMileage,
+                label = { Text("Quilometragem total") },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                colors = premiumFieldColors(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = maintenanceState.mesesDesdeUltimaRevisao,
+                onValueChange = onUpdateMonthsSinceService,
+                label = { Text("Meses desde a última revisão") },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                colors = premiumFieldColors(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Preferência de lembrete",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurfaceVariant
                 )
-                PreferenciaCard(
-                    preferencia = PreferenciaRevisao.POR_TEMPO,
-                    selecionada = maintenanceState.preferencia == PreferenciaRevisao.POR_TEMPO,
-                    aoSelecionar = { onSelectPreference(PreferenciaRevisao.POR_TEMPO) },
-                    modifier = Modifier.weight(1f)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    PreferenciaCard(
+                        preferencia = PreferenciaRevisao.POR_KM,
+                        selecionada = maintenanceState.preferencia == PreferenciaRevisao.POR_KM,
+                        aoSelecionar = { onSelectPreference(PreferenciaRevisao.POR_KM) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    PreferenciaCard(
+                        preferencia = PreferenciaRevisao.POR_TEMPO,
+                        selecionada = maintenanceState.preferencia == PreferenciaRevisao.POR_TEMPO,
+                        aoSelecionar = { onSelectPreference(PreferenciaRevisao.POR_TEMPO) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            if (maintenanceState.erro != null) {
+                Text(
+                    text = maintenanceState.erro,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.error
                 )
             }
-        }
-
-        if (maintenanceState.erro != null) {
-            Text(
-                text = maintenanceState.erro,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Vermelho
-            )
         }
     }
 }
@@ -213,14 +192,16 @@ private fun PreferenciaCard(
     aoSelecionar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val corFundo = if (selecionada) Verde else Preto
-    val corBorda = if (selecionada) Verde else Branco.copy(alpha = 0.2f)
-    val corTexto = if (selecionada) Preto else Branco
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(16.dp)
+    val corFundo = if (selecionada) colors.primaryContainer else colors.surface
+    val corBorda = if (selecionada) colors.primary else colors.outline.copy(alpha = 0.7f)
+    val corTexto = if (selecionada) colors.onPrimaryContainer else colors.onSurface
 
     Column(
         modifier = modifier
-            .border(1.dp, corBorda, RoundedCornerShape(14.dp))
-            .background(corFundo, RoundedCornerShape(14.dp))
+            .border(BorderStroke(1.dp, corBorda), shape)
+            .background(corFundo, shape)
             .clickable { aoSelecionar() }
             .padding(vertical = 12.dp, horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -240,41 +221,38 @@ private fun PerguntaMinimalista(
     indiceSelecionado: Int?,
     aoSelecionarOpcao: (Int) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, CinzaEscuro, RoundedCornerShape(18.dp))
-            .background(CinzaEscuro, RoundedCornerShape(18.dp))
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = pergunta.texto,
-            style = MaterialTheme.typography.titleMedium,
-            color = Branco
-        )
-        pergunta.opcoes.forEachIndexed { indice, opcao ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { aoSelecionarOpcao(indice) }
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = indiceSelecionado == indice,
-                    onClick = { aoSelecionarOpcao(indice) },
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = Verde,
-                        unselectedColor = Branco.copy(alpha = 0.5f)
+    val colors = MaterialTheme.colorScheme
+
+    PremiumPanel(modifier = Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = pergunta.texto,
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.onSurface
+            )
+            pergunta.opcoes.forEachIndexed { indice, opcao ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { aoSelecionarOpcao(indice) }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = indiceSelecionado == indice,
+                        onClick = { aoSelecionarOpcao(indice) },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = colors.primary,
+                            unselectedColor = colors.onSurfaceVariant
+                        )
                     )
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = opcao.texto,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Branco.copy(alpha = 0.9f)
-                )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = opcao.texto,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurface.copy(alpha = 0.95f)
+                    )
+                }
             }
         }
     }
@@ -286,21 +264,27 @@ private fun RodapePerguntas(
     aoVoltar: () -> Unit,
     aoVerResultado: () -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Preto)
-            .padding(20.dp),
+            .background(colors.background.copy(alpha = 0.7f))
+            .padding(horizontal = 20.dp, vertical = 18.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Button(
             onClick = aoVoltar,
             colors = ButtonDefaults.buttonColors(
-                containerColor = CinzaEscuro,
-                contentColor = Branco
+                containerColor = colors.surface,
+                contentColor = colors.onSurface
+            ),
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 1.dp
             ),
             modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(14.dp)
+            shape = RoundedCornerShape(18.dp)
         ) {
             Text(text = "Voltar")
         }
@@ -308,13 +292,17 @@ private fun RodapePerguntas(
             onClick = aoVerResultado,
             enabled = habilitarResultado,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Verde,
-                contentColor = Preto,
-                disabledContainerColor = CinzaEscuro,
-                disabledContentColor = Branco.copy(alpha = 0.6f)
+                containerColor = colors.primary,
+                contentColor = colors.onPrimary,
+                disabledContainerColor = colors.surfaceVariant,
+                disabledContentColor = colors.onSurfaceVariant
+            ),
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 2.dp
             ),
             modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(14.dp)
+            shape = RoundedCornerShape(18.dp)
         ) {
             Text(text = "Ver HealthLevel")
         }

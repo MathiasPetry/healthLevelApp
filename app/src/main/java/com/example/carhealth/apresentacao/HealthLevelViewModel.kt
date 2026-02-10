@@ -68,7 +68,7 @@ class HealthLevelViewModel : ViewModel() {
 
         val anoFabricacao = validateYear(formState.anoFabricacao)
         if (anoFabricacao == null) {
-            formState = formState.copy(erro = "Informe um ano de fabricacao valido.")
+            formState = formState.copy(erro = "Informe um ano de fabricação válido.")
             return false
         }
 
@@ -147,13 +147,13 @@ class HealthLevelViewModel : ViewModel() {
 
         val mesesDesdeUltimaRevisao = maintenanceState.mesesDesdeUltimaRevisao.trim().toIntOrNull()
         if (mesesDesdeUltimaRevisao == null || mesesDesdeUltimaRevisao < 0) {
-            maintenanceState = maintenanceState.copy(erro = "Informe quantos meses fazem desde a ultima revisao.")
+            maintenanceState = maintenanceState.copy(erro = "Informe quantos meses fazem desde a última revisão.")
             return null
         }
 
         val preferenciaRevisao = maintenanceState.preferencia
         if (preferenciaRevisao == null) {
-            maintenanceState = maintenanceState.copy(erro = "Escolha como prefere o lembrete da revisao.")
+            maintenanceState = maintenanceState.copy(erro = "Escolha como prefere o lembrete da revisão.")
             return null
         }
 
@@ -167,13 +167,13 @@ class HealthLevelViewModel : ViewModel() {
     private fun generateSuggestions(car: Carro, maintenanceSummary: ResumoRevisao): List<String> {
         val sugestoes = mutableListOf<String>()
         val sugestaoPorId = mapOf(
-            "freios" to "Agende uma inspecao dos freios e verifique pastilhas e discos.",
-            "pneus" to "Revise a calibragem e faca o rodizio dos pneus.",
-            "suspensao" to "Avalie a suspensao para eliminar ruidos e melhorar o conforto.",
-            "direcao" to "Cheque alinhamento e balanceamento para uma direcao precisa.",
-            "motor" to "Faca diagnostico do motor para evitar falhas e perda de desempenho.",
-            "fluidos" to "Complete ou troque fluidos para evitar desgaste prematuro.",
-            "bateria" to "Monitore a saude da bateria e programe manutencao preventiva."
+            "freios" to "Agende uma inspeção dos freios e verifique o estado das pastilhas e dos discos.",
+            "pneus" to "Revise a calibragem dos pneus e realize o rodízio para garantir desgaste uniforme.",
+            "suspensao" to "Avalie o sistema de suspensão para eliminar ruídos e melhorar o conforto ao dirigir.",
+            "direcao" to "Cheque o alinhamento e o balanceamento para garantir precisão e estabilidade na direção.",
+            "motor" to "Realize um diagnóstico do motor para prevenir falhas e perda de desempenho.",
+            "fluidos" to "Verifique e substitua os fluidos do veículo para evitar desgaste prematuro dos componentes.",
+            "bateria" to "Monitore a condição da bateria e programe manutenções preventivas."
         )
 
         questions.forEach { question ->
@@ -185,19 +185,19 @@ class HealthLevelViewModel : ViewModel() {
         }
 
         if (maintenanceSummary.revisaoAtrasada) {
-            sugestoes.add("Agende uma revisao completa o quanto antes para evitar riscos.")
+            sugestoes.add("Agende uma revisão completa o quanto antes para evitar riscos.")
         } else if (maintenanceSummary.diasParaProximaRevisao in 0..30) {
-            sugestoes.add("Sua proxima revisao esta proxima. Agende com antecedencia.")
+            sugestoes.add("Sua proxima revisão esta próxima. Agende com antecedência.")
         }
 
         when (car.tipo) {
             TipoCarro.ELETRICO -> sugestoes.add("Evite descargas profundas e priorize recargas entre 20% e 80%.")
             TipoCarro.HIBRIDO -> sugestoes.add("Alterne o uso dos modos para otimizar consumo e preservar a bateria.")
-            TipoCarro.COMBUSTAO -> sugestoes.add("Prefira abastecer em postos confiaveis e mantenha o motor aquecido.")
+            TipoCarro.COMBUSTAO -> sugestoes.add("Prefira abastecer em postos confiáveis e mantenha o motor aquecido.")
         }
 
         if (sugestoes.isEmpty()) {
-            sugestoes.add("Seu carro esta equilibrado. Mantenha a manutencao preventiva em dia.")
+            sugestoes.add("Seu carro está equilibrado. Mantenha a manutenção preventiva em dia.")
         }
 
         return sugestoes.distinct()

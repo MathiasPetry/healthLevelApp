@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Informational warnings tied to dependency/toolchain upgrade cycle -->
+    <issue id="ObsoleteLintCustomCheck" severity="ignore" />
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="OldTargetApi" severity="ignore" />
+</lint>

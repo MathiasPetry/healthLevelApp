@@ -1,5 +1,6 @@
 package com.example.carhealth.apresentacao.telas
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,23 +17,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carhealth.apresentacao.InitialFormState
+import com.example.carhealth.apresentacao.tema.PremiumBackground
+import com.example.carhealth.apresentacao.tema.PremiumPanel
+import com.example.carhealth.apresentacao.tema.premiumFieldColors
 import com.example.carhealth.dominio.TipoCarro
-
-private val Preto = Color(0xFF000000)
-private val CinzaEscuro = Color(0xFF1F2933)
-private val Branco = Color(0xFFF9FAFB)
-private val Verde = Color(0xFF10B981)
-private val Vermelho = Color(0xFFDC2626)
 
 @Composable
 fun InitialScreen(
@@ -42,120 +38,110 @@ fun InitialScreen(
     onSelectType: (TipoCarro) -> Unit,
     onContinue: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Preto)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                text = "HealthLevel",
-                style = MaterialTheme.typography.displayLarge,
-                color = Branco
-            )
-            Text(
-                text = "Diagnóstico objetivo do seu carro",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Branco.copy(alpha = 0.7f)
-            )
-        }
+    val colors = MaterialTheme.colorScheme
 
+    PremiumBackground {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, CinzaEscuro, RoundedCornerShape(20.dp))
-                .background(CinzaEscuro, RoundedCornerShape(20.dp))
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
-            Text(
-                text = "Dados iniciais",
-                style = MaterialTheme.typography.titleMedium,
-                color = Branco
-            )
-
-            OutlinedTextField(
-                value = formState.modelo,
-                onValueChange = onUpdateModel,
-                label = { Text("Modelo do carro") },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Verde,
-                    unfocusedBorderColor = Branco.copy(alpha = 0.15f),
-                    focusedLabelColor = Verde,
-                    unfocusedLabelColor = Branco.copy(alpha = 0.5f),
-                    cursorColor = Verde,
-                    focusedTextColor = Branco,
-                    unfocusedTextColor = Branco
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = formState.anoFabricacao,
-                onValueChange = onUpdateYear,
-                label = { Text("Ano de fabricação") },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Verde,
-                    unfocusedBorderColor = Branco.copy(alpha = 0.15f),
-                    focusedLabelColor = Verde,
-                    unfocusedLabelColor = Branco.copy(alpha = 0.5f),
-                    cursorColor = Verde,
-                    focusedTextColor = Branco,
-                    unfocusedTextColor = Branco
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    text = "Tipo de carro",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Branco.copy(alpha = 0.85f)
+                    text = "HealthLevel",
+                    style = MaterialTheme.typography.displayLarge,
+                    color = colors.onBackground
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    TipoCarro.values().forEach { type ->
-                        CarTypeCard(
-                            type = type,
-                            selected = formState.tipoSelecionado == type,
-                            onSelect = { onSelectType(type) },
-                            modifier = Modifier.weight(1f)
+                Text(
+                    text = "Diagnóstico objetivo do seu carro",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurfaceVariant
+                )
+            }
+
+            PremiumPanel(modifier = Modifier.fillMaxWidth()) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "Dados iniciais",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colors.onSurface
+                    )
+
+                    OutlinedTextField(
+                        value = formState.modelo,
+                        onValueChange = onUpdateModel,
+                        label = { Text("Modelo do carro") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = premiumFieldColors(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = formState.anoFabricacao,
+                        onValueChange = onUpdateYear,
+                        label = { Text("Ano de fabricação") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = premiumFieldColors(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            text = "Tipo de carro",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurfaceVariant
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            TipoCarro.values().forEach { type ->
+                                CarTypeCard(
+                                    type = type,
+                                    selected = formState.tipoSelecionado == type,
+                                    onSelect = { onSelectType(type) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+
+                    if (formState.erro != null) {
+                        Text(
+                            text = formState.erro,
+                            color = colors.error,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
             }
 
-            if (formState.erro != null) {
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Button(
+                onClick = onContinue,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.primary,
+                    contentColor = colors.onPrimary
+                ),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 4.dp,
+                    pressedElevation = 2.dp
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(18.dp)
+            ) {
                 Text(
-                    text = formState.erro,
-                    color = Vermelho,
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Continuar",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Button(
-            onClick = onContinue,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Verde,
-                contentColor = Preto
-            ),
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            Text(
-                text = "Continuar",
-                style = MaterialTheme.typography.titleMedium,
-                fontSize = 16.sp
-            )
         }
     }
 }
@@ -167,15 +153,17 @@ private fun CarTypeCard(
     onSelect: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val background = if (selected) Verde else Preto
-    val border = if (selected) Verde else Branco.copy(alpha = 0.2f)
-    val textColor = if (selected) Preto else Branco
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(16.dp)
+    val background = if (selected) colors.primaryContainer else colors.surface
+    val border = if (selected) colors.primary else colors.outline.copy(alpha = 0.75f)
+    val textColor = if (selected) colors.onPrimaryContainer else colors.onSurface
 
     Column(
         modifier = modifier
             .height(56.dp)
-            .border(1.dp, border, RoundedCornerShape(14.dp))
-            .background(background, RoundedCornerShape(14.dp))
+            .border(BorderStroke(1.dp, border), shape)
+            .background(background, shape)
             .clickable(onClick = onSelect),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

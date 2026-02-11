@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.carhealth"
+    namespace = "com.example.healthlevel"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.carhealth"
+        applicationId = "com.example.healthlevel"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

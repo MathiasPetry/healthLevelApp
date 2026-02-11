@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_ID="com.example.carhealth"
+APP_ID="com.example.healthlevel"
 AVD_NAME="carhealth-api34"
 API_LEVEL="34"
 BUILD_TOOLS="34.0.0"

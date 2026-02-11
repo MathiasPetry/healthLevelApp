@@ -1,0 +1,38 @@
+package com.example.healthlevel
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.example.healthlevel.presentation.HealthLevelApp
+import com.example.healthlevel.presentation.theme.HealthLevelTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            val systemDarkTheme = isSystemInDarkTheme()
+            var useDarkTheme by rememberSaveable { mutableStateOf(systemDarkTheme) }
+
+            HealthLevelTheme(useDarkTheme = useDarkTheme) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    HealthLevelApp(
+                        isDarkTheme = useDarkTheme,
+                        onToggleTheme = { useDarkTheme = !useDarkTheme }
+                    )
+                }
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 <resources>
     <style
-        name="Theme.CarHealth"
+        name="Theme.HealthLevel"
         parent="android:Theme.DeviceDefault.Light.NoActionBar"
     />
 </resources>
